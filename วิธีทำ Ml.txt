@@ -1,0 +1,262 @@
+######################################################
+		ไลบารี่น่ารู้
+######################################################
+1.) Scikit-Learn
+Scikit-Learn เป็นแพ็คเกจที่รวบรวม library ด้าน 
+Machine Learning เอาไว้ และถูกออกแบบมาให้ทำงานร่วมกับ 
+library ของภาษาโปรแกรมมิง Python อย่าง Numpy และ Scipy ได้ดี 
+สามารถสร้างอัลกอริทึมเพื่อให้เรียนรู้ข้อมูล และศึกษาข้อมูลเพิ่มเติมต่อได้
+
+2.)Matplotlib
+เป็นโมดูลหนึ่งของ Python เหมาะสำหรับการ Visualize Data 
+หรือก็คือการพล็อตข้อมูลออกมาเป็นรูป กราฟ ชาร์ตต่างๆ และเมื่อใช้ร่วมกับ 
+Jupytor Notebook ซึ่งผู้ใช้งานสามารถโต้ตอบกับกราฟได้
+
+3.)Pandas
+Pandas ย่อมาจาก “Panel Data” 
+เป็นแพ็คเกจไลบรารีที่สร้างต่อยอดมาจาก Numpy 
+เหมาะกับการทำงานด้วยชุดข้อมูลใหญ่ ซึ่งอาจมีข้อมูลที่ถูก label 
+ผิดปะปนเข้ามามาก จะช่วยลดความเสี่ยงที่เกิดจากการเรียงข้อมูลผิดได้ 
+แถมยังถูกดีไซน์ให้เหมาะกับการจัดการ รวบรวม และจำลองภาพข้อมูลอีกด้วย
+
+4.) Seaborn
+Seaborn เป็นไลบรารีสำหรับสร้างกราฟิกทางสถิติในภาษา Python 
+ถูกสร้างขึ้นบน Matplotlib และรวมเข้ากับโครงสร้างข้อมูลของ Pandas 
+เป็นเครื่องมือที่แตกต่างจาก Matplotlib ตรงที่มีความเชี่ยวชาญในการแสดงภาพสถิติ 
+ใช้ไวยากรณ์น้อยกว่า และมีธีมเริ่มต้นที่เข้าใจง่าย
+------------------------------------------------------
+AI คืออะไร ? คอมเลียนแบบมนุษย์ 
+ML คือ การสอนให้เครื่องเรียนรู้ได้
+DL คือ สอนคอมเรียนรู้เลียนแบบโครงสร้างประสาทของมนุษย์
+
+------------------------------------------------------
+
+Datasets คือ ชุดข้อมูลที่เอาไว้สอนML โดยมีลักษณะ
+เหมือนกันจัดเป็นชุด เช่น Iris datasets(ดอกไม้) 
+MNIST dataset(เลขอารบิก)
+
+------------------------------------------------------
+MNIST dataset(image) คือ ชุดข้อมูลลาบมือตัวเลขอารบิกขนาด28x28px 
+มีข้อมูลชุดเรียนรู้ 60,000 รูป ชุดทดสอบ 10,000 รูป
+
+ *ข้อมูลชุดเรียนรู้ (training set) เอาไปเทรนMLเพื่อสร้าง
+Model
+
+*ข้อมูลชุดทดสอบ (test set) ใช้ทดสอบโมเดลที่สร้างขึ้น
+-----------------------------------------------------
+การแสดงภาพด้วย Pylab และ Matplotlib 
+
+import matplotlib.pyplot as plt
+from sklearn import datasets
+digit_dataset=datasets.load_digits() ไลบารี่MNIST
+print(digit_dataset.target[2])
+plt.imshow(digit_dataset.images[2],cmap=plt.get_cmap("gray"))
+plt.show()
+------------------------------------------------------
+การอ่านไฟล์ .mat 
+from scipy.io import loadmat
+
+mnist_raw=loadmat("mnist-original.mat")
+print(mnist_raw) แสดงรายละเอียดทุกอย่างของรูป(ข้อมูลดิบ)
+------------------------------------------------------
+การแสดง px ของรูปภาพทั้งหมด
+from scipy.io import loadmat
+import matplotlib.pyplot as plt#แสดงรูปภพใน dataset
+
+mnist_raw=loadmat("mnist-original.mat")
+
+
+
+#create new dict for data and targets
+mnist={
+
+    "data":mnist_raw["data"],
+	#"data":mnist_raw["data"].T คือการ transpose
+    "target":mnist_raw["label"][0],
+
+}
+
+number=x[1500] #กำหนดรูปภาพที่เราสนใจ
+number_image=number.reshape(28,28)#แปลงเป็นarray2มิติ
+เพื่อนำมาใช้งานในอนาคต
+ใช้ plt ในการแสดงผลรูปภาพ
+
+plt.imshow(
+    number_image, 
+    cmap=plt.cm.binary,
+    interpolation="nearest"
+    )
+plt.show()
+
+print(mnist["data"])
+#print(mnist["data"].shape) แสดงtuple(ขนาดของรูป, จ.น.รูป)
+------------------------------------------------------
+การเขียนโปรแกรมแบบแบ่งชุดข้อมูล
+
+โดยเราควรแบ่งข้อมูลออกเป็น traning 75%, testing 25%
+ต้องมีการเก็บค่า 4 ค่า คือ
+	-x_train
+	-y_train
+	-x_test
+	-y_test 
+
+คำสั่ง train_test_split() เป็นคำสั่งในการแบ่ง(หั่น)ข้อมูล
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+iris_dataset =load_iris()
+
+x_train, x_test, y_train, y_test = 
+train_test_split(iris_dataset["data"],iris_dataset["target"], test_size=0.2,random_state=0)
+
+#default 75% 25%
+#x_train, x_test เก็บข้อมูลใน iris_dataset["data"]
+#y_train, y_test เก็บข้อมูลใน iris_dataset["target"] 
+*ตัวเลขสายพันธุ์ดอกไม้
+#test_size = ค่าคงที่(0.2, 0.3, 0.5) กำหนดขนาด test_size
+
+print(x_train.shape)
+print(x_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+------------------------------------------------------
+
+import seaborn as sb
+import matplotlib.pyplot as plt
+#Calling the iris datasets to use
+iris_dataset=sb.load_dataset("iris")
+
+#set the chart
+sb.set() 
+#use the pairplot to show
+#set hue to "species" to classify the data we have
+#the seaborn libary will make data diffrent as species difference
+sb.pairplot(iris_dataset,hue="species",size=2)
+#show the graph
+plt.show()
+#print(iris_dataset.head())
+#show first 5 table of iris datasets
+------------------------------------------------------
+Linear regression
+
+y=ax+b เป็น  สมการหลัก
+
+การสร้างกราฟเส้นตรงแบบไม่มีการแสดงผลเรื่องการกระจายตัวกันของข้อมูล
+import numpy as np
+import matplotlib.pyplot as plt
+
+#--create array 1 dim--#
+#creat 10 sub-ranges within range(-5,5) 
+x=np.linspace(-5,5,100)
+#--set initial equation--#
+y=2*x+1 
+
+#--plot the graph--#
+#"-r" set red line to the graph
+plt.plot(x,y,"-r",label="2x+1")
+#--set label to x-axis and y-axis--#
+plt.xlabel("x")
+plt.ylabel("y")
+#--show lebel at the location we want--#
+plt.legend(loc="upper left")
+#--Show graph name--#
+plt.title("Grap 2x+1")
+#--represent with the grid--#
+plt.grid()
+plt.show()
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+การสร้างกราฟแบบมีการกระจายกันของข้อมูล(Scatter)
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+#--create array 1 dim--#
+#creat 10 sub-ranges within range(-5,5) 
+x=np.linspace(-5,5,10)
+#--set initial equation--#
+y=2*x+1 
+
+#--plot the (Scatter)graph--#
+#change plt.plot() to plt.scatter()
+#then use this form plt.scatter(x,y)  
+plt.scatter(x,y)
+#--set label to x-axis and y-axis--#
+plt.xlabel("x")
+plt.ylabel("y")
+
+"""--!!! No legend to show !!!--"""
+
+#--Show graph name--#
+plt.title("Grap 2x+1")
+#--represent with the grid--#
+plt.grid()
+plt.show()
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ การสร้างกราฟแบบมีการกระจายข้อมูลอย่างสุ่ม (เป็นการจำลองชุดข้อมูลขึ้นมา )
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+#random numbers in the range we want
+rng = np.random
+#random the X value in the range we want
+x=rng.rand(50)*10
+#random the Y value in the range we want
+y=2*x+rng.randn(50)
+
+#plot the graph 
+plt.scatter(x,y)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+-------------------------------------------------------------------
+การสร้างโมเดล Linear Regression
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+#--การสร้างแบบจำลองข้อมูล--#
+#สุ่มตัวเลข
+rng = np.random
+#สุ่มค่า x เพื่อจำลองความหลากหลายของข้อมูล
+x=rng.rand(50)*10
+#สุ่มค่า y เพื่อจำลองความหลากหลายของข้อมูล
+y=2*x+rng.randn(50)
+
+#--linear regression model--#
+#สร้างแบบจำลองจาก linear regression 
+model=LinearRegression()
+x_new = x.reshape(-1,1) #เปลี่ยน x เป็น array 2 มิติ 
+
+#--trian algorithm--#
+model.fit(x_new,y)
+
+#หาค่า R-Square 0-100% ใช้วัดค่าตัวแปร y ว่าได้กี่% เพื่อเอา y ไปใช้งานต่อ
+print(model.score(x_new, y))
+"""#หาค่า intercept 
+print(model.intercept_)
+#หาค่า Coefficient 
+print(model.coef_)"""
+
+#--test model--#
+xfit=np.linspace(-1,1)
+xfit_new=xfit.reshape(-1,1)
+yfit_new=model.predict(xfit_new) #
+
+#--analyze model--#
+plt.scatter(x,y)
+plt.plot(xfit_new,yfit_new)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+------------------------------------------------------------------
+การสร้างโมเดลทำนายอุณหภูมิ
+
+
+
+
+
