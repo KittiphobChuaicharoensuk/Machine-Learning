@@ -44,11 +44,11 @@ Model
 
 *ข้อมูลชุดทดสอบ (test set) ใช้ทดสอบโมเดลที่สร้างขึ้น
 -----------------------------------------------------
-การแสดงภาพด้วย Pylab และ Matplotlib 
+#การแสดงภาพด้วย Pylab และ Matplotlib 
 
 import matplotlib.pyplot as plt
 from sklearn import datasets
-digit_dataset=datasets.load_digits() ไลบารี่MNIST
+digit_dataset=datasets.load_digits() #ไลบารี่MNIST
 print(digit_dataset.target[2])
 plt.imshow(digit_dataset.images[2],cmap=plt.get_cmap("gray"))
 plt.show()
@@ -257,6 +257,329 @@ plt.show()
 การสร้างโมเดลทำนายอุณหภูมิ
 
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pandas.core.frame import DataFrame
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression 
 
+#read file from the folder
+"""เมื่อไฟล์อยู่โฟลเดอร์เดียวกับโปรแกรมที่เราใช้งาน"""
+datasets1=pd.read_csv("weather.csv")
+
+#read file from the links
+datasets2=pd.read_csv("https://raw.githubusercontent.com/kongruksiamza/MachineLearning/master/Linear%20Regression/Weather.csv")
+
+#show all column name(index) in the file
+#print(datasets2.keys())
+
+#show min-max temp a day(ordered pair)
+#datasets2.plot(x="MinTemp",y="MaxTemp",style="o")
+""" การใช้ datasets2 เป็น plot เพราะว่าเราจะได้
+ใช้ข้อมูลจากตาราง csv ที่เรามีได้   
+แสดงค่าคู่อันดับของอุณหภูมิในแต่ละวัน โดยกำหนดให้
+x เป็นค่าของอุณหภูมิต่ำสุด(กำหนดค่าตามชื่อหลัก)
+ํํy เป็นค่าของอุณหภูมิสูงสุด(กำหนดค่าตามชื่อหลัก)
+ค่าตั้งต้นเป็นกราฟ ถ้าอยากให้เป็นจุด ต้องใช้คำสั่ง
+style = '0' """
+
+# plt.title("Min and Max Temp")
+# plt.xlabel("Mintemp")
+# plt.ylabel("Maxtemp")
+# plt.show()
+
+"""การดูข้อมูลเชิงสถิติของแต่ละคอลัมน์"""
+# print(datasets2.describe())
+
+# set value to variabl x and y
+x = datasets2["MinTemp"].values.reshape(-1,1)
+y = datasets2["MaxTemp"].values.reshape(-1,1) 
+
+# train and test set (80% - 20%)
+xtrain, xtest, ytrain, ytest = train_test_split(x,y,test_size=0.2,random_state=0)
+
+#training model
+model=LinearRegression()
+model.fit(xtrain,ytrain)
+
+#testing model
+y_predicted=model.predict(xtest)
+
+#To compare real data and predicted data 
+df=pd.DataFrame({"Actual value":ytest.flatten(), "Predicted value":y_predicted.flatten()})
+"""ใช้คำสั่ง .flatten() ในการแปลง array 2 มิติ
+ให้เป็น 1 มิติ """
+
+df1=df.head(20)
+"""ดึงข้อมูลของ 20 แถวแรกระหว่าง ค่าจริง และ ค่าทำนาย"""
+df1.plot(kind="bar",figsize=(10,5))
+"""แสดงข้อมูลเป็นแผนภูมิแท่งผ่านคำสั่ง *kind='bar'* 
+   และกำหนดขนาดของหน้าต่างแสดงผลผ่านคำสั่ง *figsize=(10,5)*
+"""
+plt.show()
+
+------------------------------------------------------------------
+ค่าความสัมพันธ์
+Coefficient ค่าสัมประสิทธิ์แสดงการตัดสินใจ คือ ตัวเลขที่บอกความสัมพันธ์ของสองตัวแปร หรือ 
+ค่าที่แสดงว่าตัวแปร x มีอิทธิพลต่อตัวแปร y มากน้อยเพียงใดโดยมี ขอบเขตในช่วง -1 ถึง 1
+
+Intercept คือ ค่าที่บ่งบอกจุดตัดแกน
+
+R-Square คือ ค่าความผันแปรของตัวแปร y มีค่าอยู่ระหว่าง 0% — 100%
+– 0% หมายถึง ผลลัพธ์ที่ได้มานั้นไม่สามารถอธิบายความผันแปรของค่าตัวแปร y ต่างที่กระจายรอบค่าเฉลี่ยได้เลย
+– 100% แสดงให้เห็นว่าผลลัพธ์ที่ได้มานั้นสามารถอธิบายความผันแปรของค่าตัวแปร y 
+ต่างที่กระจายรอบค่าเฉลี่ยได้เป็นอย่างดี
+
+การวัดประสิทธิภาพ
+y_pred คือผลการทำนายผลลัพธ์จากโมเดล
+y_test คือ ข้อมูลจริงที่ใช้ทดสอบการทำนายผลโมเดล
+Loss Function คือ การคำนวน Error ว่า y_pred ที่โมเดลทำนายออกมา ต่างจาก y_test อยู่เท่าไร 
+แล้วหาค่าเฉลี่ย เพื่อที่จะนำมาหา Gradient ของ Loss แล้วใช้อัลกอริทึม Gradient Descent 
+เพื่อให้ Loss น้อยลงในการเทรนรอบถัดไป(Loss ยิ่งค่าน้อยยิ่งดี)
+Loss Function ที่นิยมใช้ในงาน Regression ในปัจจุบัน มีหลายตัว เช่น Mean Absolute Error 
+(MAE) หรือ L1 Loss , Mean Squared Error (MSE) หรือ L2 Loss , 
+Root Mean Squared Error (RMSE)
+
+1. Mean Absolute Error (MAE) การคำนวน Error ว่า y_pred ต่างจาก y_test อยู่เท่าไร 
+ด้วยการนำมาลบกันตรง ๆ แล้วหาค่าเฉลี่ย โดยไม่สนใจเครื่องหมาย (Absolute) เพื่อหาขนาดของ Error 
+โดยไม่สนใจทิศทาง
+
+2. Mean Squared Error (MSE) การคำนวน Error ว่า y_pred ต่างจาก y_test 
+อยู่เท่าไร ด้วยการนำมาลบกัน แล้วยกกำลังสอง (Squared) เพื่อไม่ต้องสนใจค่าติดลบ (ถ้ามี) แล้วหาค่าเฉลี่ย
+
+3. Root Mean Squared Error (RMSE) คือ นำ MSE มาหา Squared Root
+
+ค่า MSE, MAE อยู่ในช่วง 0 — Infinity เหมือนกัน ยิ่งน้อยคือยิ่งดีถ้าเป็น 0 คือ ไม่ มีError เลย 
+ดังนั้นถ้าค่าเท่ากับ 0 แปลว่าโมเดลทำนายค่า y_test ได้ถูกต้อง100% แต่ในทางปฏิบัติโอกาสที่จะเทรนโมเดลได้ 
+loss = 0 เป็นไปได้ยากมาก
+อาศัยส่วนของ scikit-learn เข้ามาทำงานร่วมด้วยเพื่อวัดผลจากค่าที่คาดการหรือพยากรณ์ได้จากการ 
+predict ตัวโมเดล (y_pred) และค่าจริงจาก y_test
+------------------------------------------------------------------
+การวัดประสิทธิภาพแบบจำลอง
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pandas.core.frame import DataFrame
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics  
+
+#read file from the folder
+"""เมื่อไฟล์อยู่โฟลเดอร์เดียวกับโปรแกรมที่เราใช้งาน"""
+datasets1=pd.read_csv("weather.csv")
+
+#read file from the links
+datasets2=pd.read_csv("https://raw.githubusercontent.com/kongruksiamza/MachineLearning/master/Linear%20Regression/Weather.csv")
+
+#show all column name(index) in the file
+#print(datasets2.keys())
+
+#show min-max temp a day(ordered pair)
+#datasets2.plot(x="MinTemp",y="MaxTemp",style="o")
+""" การใช้ datasets2 เป็น plot เพราะว่าเราจะได้
+ใช้ข้อมูลจากตาราง csv ที่เรามีได้   
+แสดงค่าคู่อันดับของอุณหภูมิในแต่ละวัน โดยกำหนดให้
+x เป็นค่าของอุณหภูมิต่ำสุด(กำหนดค่าตามชื่อหลัก)
+ํํy เป็นค่าของอุณหภูมิสูงสุด(กำหนดค่าตามชื่อหลัก)
+ค่าตั้งต้นเป็นกราฟ ถ้าอยากให้เป็นจุด ต้องใช้คำสั่ง
+style = '0' """
+
+# plt.title("Min and Max Temp")
+# plt.xlabel("Mintemp")
+# plt.ylabel("Maxtemp")
+# plt.show()
+
+"""การดูข้อมูลเชิงสถิติของแต่ละคอลัมน์"""
+# print(datasets2.describe())
+
+# set value to variabl x and y
+x = datasets2["MinTemp"].values.reshape(-1,1)
+y = datasets2["MaxTemp"].values.reshape(-1,1) 
+
+# train and test set (80% - 20%)
+xtrain, xtest, ytrain, ytest = train_test_split(x,y,test_size=0.2,random_state=0)
+
+#training model
+model=LinearRegression()
+model.fit(xtrain,ytrain)
+
+#testing model
+y_predicted=model.predict(xtest)
+
+#To compare real data and predicted data 
+df=pd.DataFrame({"Actual value":ytest.flatten(), "Predicted value":y_predicted.flatten()})
+"""ใช้คำสั่ง .flatten() ในการแปลง array 2 มิติ
+ให้เป็น 1 มิติ """
+
+df1=df.head(20)
+"""ดึงข้อมูลของ 20 แถวแรกระหว่าง ค่าจริง และ ค่าทำนาย"""
+df1.plot(kind="bar",figsize=(10,5))
+"""แสดงข้อมูลเป็นแผนภูมิแท่งผ่านคำสั่ง *kind='bar'* 
+   และกำหนดขนาดของหน้าต่างแสดงผลผ่านคำสั่ง *figsize=(10,5)*
+"""
+#plt.show()
+
+print("MAE :", metrics.mean_absolute_error(ytest,y_predicted))
+print("MSE :", metrics.mean_squared_error(ytest,y_predicted))
+print("RMAE :", np.sqrt(metrics.mean_squared_error(ytest,y_predicted)))
+print("Score :",metrics.r2_score(ytest,y_predicted)*100,"%")
+
+-------------------------------------------------------------------
+
+Binary Classifier
+
+ตัวจำแนกแบบไบนารี (Binary Classifier) เป็นวิธีการแบ่งข้อมูลออกเป็น 2 กลุ่ม (Binary Class) 
+จากภาพตัวอย่างจะแบ่งข้อมูลออกเป็น 2 กลุ่ม คือ กลุ่มสีแดงและกลุ่มสีน้ำเงิน (Class สีแดง และ Class สีน้ำเงิน)
+โดยใช้เส้น Hyperplane (เส้นสมมุติ | เส้น Linear Regression) แบ่งกลุ่มข้อมูลทั้ง 2 กลุ่มแยกออกจากกัน
+
+ภายใน LAB จะยกตัวอย่างเพื่อให้เห็นการแบ่งกลุ่มของข้อมูลโดยใช้ MNIST Dataset 
+ว่าข้อมูลกลุ่มใดแสดงกลุ่มตัวเลข 0–9 โดยข้อมูลทั้งหมดจะมี 70,000 ชุดจะต้องเขียนโปรแกรมแบ่งข้อมูลออกเป็น 2 ส่วนได้แก่
+- Training Set 60,000 ชุด
+- Test Set 10,000 ชุด
+
+from scipy.io import loadmat
+import numpy as np
+import matplotlib.pyplot as plt
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+print(xtrain.shape)
+print("########################")
+print(xtest.shape)
+print("########################")
+print(ytrain.shape)
+print("########################")
+print(ytest.shape)
+
+
+//////////////////////////////////////////////////////////////////
+
+from scipy.io import loadmat
+import numpy as np
+import matplotlib.pyplot as plt
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+#class 0, class not 0
+#ข้อมูล 1 ค่า -> data model ->class 0 ? true: false 
+predict = 500
+#create boolean array if the value equals zero
+ytrain_0 = (ytrain==0)
+ytest_0 = (ytest==0)
+
+print(ytest_0.shape, ytrain_0)
+print("########################")
+print(ytrain_0.shape, ytrain_0)
+
+-------------------------------------------------------------------
+
+Stochastic Gradient Descent(SGD) 
+
+
+
+from scipy.io import loadmat
+from sklearn.linear_model import SGDClassifier
+import numpy as np
+import matplotlib.pyplot as plt
+
+def displayImage(x):
+    plt.imshow(
+        x.reshape(28,28),
+        cmap=plt.cm.binary,
+        interpolation="nearest")
+    plt.show()
+
+def displayPredict(clf, actually_y,x_test):
+    print("Actually:",actually_y)
+    print("Prediction:",clf.predict([x_test][0]))   
+ 
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+#class 0, class not 0
+#ข้อมูล 1 ค่า -> data model ->class 0 ? true: false 
+predict_number = 5000
+#create boolean array if the value equals zero
+ytrain_0 = (ytrain==0)
+ytest_0 = (ytest==0)
+
+
+sgd_clf = SGDClassifier() 
+"""สร้าง Object SGD"""
+sgd_clf.fit(xtrain,ytrain_0)
+"""เทรนข้อมูลทั้งหมดโดยเช็ค class""" 
+
+displayImage(xtest[predict_number])
+displayPredict(sgd_clf,ytest_0,xtest[predict_number])
+
+-------------------------------------------------------------------
+
+Cross Validation
+
+from scipy.io import loadmat
+from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import cross_val_score
+import numpy as np
+import matplotlib.pyplot as plt
+
+def displayImage(x):
+    plt.imshow(
+        x.reshape(28,28),
+        cmap=plt.cm.binary,
+        interpolation="nearest")
+    plt.show()
+
+def displayPredict(clf, actually_y,x_test):
+    print("Actually:",actually_y)
+    print("Prediction:",clf.predict([x_test][0]))   
+ 
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+#class 0, class not 0
+#ข้อมูล 1 ค่า -> data model ->class 0 ? true: false 
+predict_number = 5000
+#create boolean array if the value equals zero
+ytrain_5 = (ytrain==5)
+ytest_5 = (ytest==5)
+
+
+sgd_clf = SGDClassifier() 
+"""สร้าง Object SGD"""
+sgd_clf.fit(xtrain,ytrain_5)
+"""เทรนข้อมูลทั้งหมดโดยเช็ค class""" 
+
+score = cross_val_score(sgd_clf,xtrain,ytrain_5,cv=3,scoring="accuracy")
+print(score)
 
 
