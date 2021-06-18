@@ -749,6 +749,74 @@ print(classification_report(ytest_pred,ytest_5,target_names=classes))
 
 ---------------------------------------------------------------
 
+การคำนวณเพื่อนบ้านที่ใกล้ที่สุด (K-Nearest Neighbors:KNN) 
+
+เป็นวิธีการแบ่งคลาสสำหรับใช้จัดหมวดหมู่ข้อมูล (Classification)
+ใช้หลักการเปรียบเทียบข้อมูลที่สนใจกับข้อมูลอื่นว่ามีความคล้ายคลึงมากน้อยเพียงใด 
+หากข้อมูลที่กำลังสนใจนั้นอยู่ใกล้ข้อมูลใดมากที่สุด 
+ระบบจะให้คำตอบเป็นเหมือนคำตอบของข้อมูลที่อยู่ใกล้ที่สุดนั้น 
+ลักษณะการทำงานแบบไม่ได้ใช้ข้อมูลชุดเรียนรู้ (training data) 
+ในการสร้างแบบจำลองแต่จะใช้ข้อมูลนี้มาเป็นตัวแบบจำลองเลย
+
+* เทคนิคนี้จะตัดสินใจว่าข้อมูลมีความคล้ายคลึงหรือใกล้เคียงกับคลาสใด โดยการตรวจจสอบข้อมูลบางจำนวน (K)
+* เหมาะสำหรับข้อมูลแบบตัวเลขเพื่อหาวิธีการวัดระยะห่างของแต่ละ Attribute ในข้อมูลให้ได้
+
+ลักษณะการทำงาน:
+**ขอเปลี่ยนชื่อ Class ในแผนภาพเพื่ออธิบายการทำงาน
+Class 1 = Class A (สี่เหลี่ยม)
+Class 2= Class B(สามเหลี่ยม)
+
+1.ทำการเปรียบเทียบจุดใหม่วงกลมสีเขียว (New Point) กับจุดทั้งหมด (Point)ใน 
+Training Set เพื่อหาจุดใกล้เคียงกับจุดใหม่
+
+2.กำหนดจำนวนจุดใกล้เคียงกับจุดใหม่จำนวน K จุด
+
+3.หาก K=1 แสดงว่าให้นำจุดที่ใกล้เคียงกับจุดใหม่ 1 จุดมาพิจารณานั่นคือ Class A 
+มากำหนดค่า Class ให้จุดใหม่เป็น Class A เหมือนกัน
+
+4.หาก K=3 แสดงว่าให้นำจุดที่ใกล้เคียงกับจุดใหม่ 3 จุดมาพิจารณานั่นคือ Class A 1 จุด 
+กับ Class B อีก 2 จุดมาคำนวณผลรวมค่าที่ใกล้เคียง ผลปรากฎว่า Class B 
+มี 2 จุดค่าผลรวมความใกล้เคียงมากกว่า Class A ดังนั้นจุดใหม่จะถูกกำหนดให้เป็น Class B
+
+ข้อดีของ KNN
+1.หากเงื่อนไขในการตัดสินใจมีความซับซ้อนวิธีนี้สามารถนำไปสร้างโมเดลที่มีประสิทธิภาพได้
+
+ข้อเสียของ KNN
+1.ใช้เวลาคำนวณนาน
+2.ถ้า Attribute มีจำนวนมากจะเกิดข้อผิดพลาดในการคำนวณค่า
+3.คำนวณค่าได้เฉพาะข้อมูลประเภท Nominal เช่น ข้อมูลเพศชาย-หญิง อาชีพ
+
+---------------------------------------------------------------
+
+การสร้าง KNN model
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, accuracy_score
+
+iris_datasets = load_iris()
+
+x=iris_datasets["data"]
+y=iris_datasets["target"]
+
+xtrain, xtest, ytrain, ytest = train_test_split(x,y,test_size=0.4,random_state=0)
+
+#Model
+knn = KNeighborsClassifier(n_neighbors=1)
+
+#Trainning
+knn.fit(xtrain,ytrain)
+
+#Prediction
+ypred=knn.predict(xtest)
+
+# print(classification_report(ytest,ypred,target_names=iris_datasets["target_names"]))
+print(f"ความแม่นยำ: {accuracy_score(ytest,ypred)*100}")
+
+--------------------------------------------------------------
+
+
 
 
 
