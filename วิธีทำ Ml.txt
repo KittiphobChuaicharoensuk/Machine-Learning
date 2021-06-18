@@ -528,7 +528,7 @@ ytest_0 = (ytest==0)
 
 
 sgd_clf = SGDClassifier() 
-"""สร้าง Object SGD"""
+"""สร้าง Object SGD แยกกลุ่มของข้อมมูลที่เป็นเลข 0 กับไม่ใช่ แยกกัน"""
 sgd_clf.fit(xtrain,ytrain_0)
 """เทรนข้อมูลทั้งหมดโดยเช็ค class""" 
 
@@ -538,6 +538,10 @@ displayPredict(sgd_clf,ytest_0,xtest[predict_number])
 -------------------------------------------------------------------
 
 Cross Validation
+
+Cross-validation Test การทดสอบประสิทธิภาพของโมเดลด้วยวิธี Cross-validation 
+นี้จะทําการแบ่งข้อมูลออกเป็นหลายๆส่วน (k) เช่นกำหนดให้ k-fold=3 แสดงว่ามีการแบ่งข้อมูลออกเป็น 3 ส่วน 
+หรือการทดลอง 3 ครั้งโดยผลลัพธ์ที่ได้จะบอก ผลการทดลองครั้งที่ 1 , 2 และ 3 ตามลำดับ
 
 from scipy.io import loadmat
 from sklearn.linear_model import SGDClassifier
@@ -559,7 +563,9 @@ def displayPredict(clf, actually_y,x_test):
 mnist_raw = loadmat("mnist-original.mat")
 mnist = {
    "data":mnist_raw["data"].T,
+	"""เก็บข้อมูล ตัวเลข และ ขนาดของรูป"""
    "target":mnist_raw["label"][0]
+	"""เก็บข้อมูลตัวเลข 0-9 บอกกลุ่มของตัวเลข"""
 }
 
 x,y = mnist["data"],mnist["target"]
@@ -581,5 +587,169 @@ sgd_clf.fit(xtrain,ytrain_5)
 
 score = cross_val_score(sgd_clf,xtrain,ytrain_5,cv=3,scoring="accuracy")
 print(score)
+
+---------------------------------------------------------------
+
+Confusion Matrix
+	
+	ใช้วัดประสิทธิภาพของตัวโมเดล
+
+from scipy.io import loadmat
+from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import confusion_matrix
+import itertools 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def displayConfusionMatrix(cm,cmap=plt.cm.Spectral):
+    classes_x=["Other Number","Number 5"]
+    classes_y=["Other Number Group","Number 5 Group"]
+    plt.imshow(cm,interpolation='nearest',cmap=cmap)
+    plt.title("Confusion Matrix")
+    plt.colorbar()
+    trick_marks=np.arange(len(classes_x))
+    plt.xticks(trick_marks,classes_x)
+    plt.yticks(trick_marks,classes_y)
+    thresh=cm.max()/2
+    for i , j in itertools.product(range(cm.shape[0]),range(cm.shape[1])):
+        plt.text(j,i,format(cm[i,j],'d'),
+        horizontalalignment='center',
+        color='white' if cm[i,j]>thresh else 'black')
+
+    plt.tight_layout()
+    plt.ylabel('Actually')
+    plt.xlabel('Prediction')
+    plt.show()
+
+def displayImage(x):
+    plt.imshow(
+        x.reshape(28,28),
+        cmap=plt.cm.binary,
+        interpolation="nearest")
+    plt.show()
+
+def displayPredict(clf, actually_y,x_test):
+    print("Actually:",actually_y)
+    print("Prediction:",clf.predict([x_test])[0])   
+ 
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+#class 0, class not 0
+#ข้อมูล 1 ค่า -> data model ->class 0 ? true: false 
+predict_number = 6000
+#create boolean array if the value equals zero
+ytrain_5 = (ytrain==5)
+ytest_5 = (ytest==5)
+
+sgd_clf = SGDClassifier() 
+"""สร้าง Object SGD"""
+sgd_clf.fit(xtrain,ytrain_5)
+"""เทรนข้อมูลทั้งหมดโดยเช็ค class""" 
+
+ytrain_pred = cross_val_predict(sgd_clf,xtrain,ytrain_5,cv=3)
+cm=confusion_matrix(ytrain_5,ytrain_pred)
+
+print(cm)
+
+plt.figure()
+displayConfusionMatrix(cm,)
+---------------------------------------------------------------
+
+ค่า Precision, Recall, F1-Score
+
+True Positive (TP) — ทายว่าถูกต้อง แล้วตอบตรงตามที่ทายไว้
+True Negative (TN) — ทายว่าไม่ถูกต้อง แล้วตอบตรงตามที่ทายไว้
+False Positive (FP) — ทายว่าถูกต้อง แต่คำตอบคือไม่ถูกต้อง
+False Negative (FN)- ทายว่าไม่ถูกต้อง แต่คำตอบคือถูกต้อง
+
+Precision = TP/(TP+FP)
+
+Recall = TP/(TP+FN)
+
+Accuracy = (TP+TN)/total
+
+from scipy.io import loadmat
+from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import confusion_matrix,classification_report
+import itertools 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def displayConfusionMatrix(cm,cmap=plt.cm.Spectral):
+    classes_x=["Other Number","Number 5"]
+    classes_y=["Other Number Group","Number 5 Group"]
+    plt.imshow(cm,interpolation='nearest',cmap=cmap)
+    plt.title("Confusion Matrix")
+    plt.colorbar()
+    trick_marks=np.arange(len(classes_x))
+    plt.xticks(trick_marks,classes_x)
+    plt.yticks(trick_marks,classes_y)
+    thresh=cm.max()/2
+    for i , j in itertools.product(range(cm.shape[0]),range(cm.shape[1])):
+        plt.text(j,i,format(cm[i,j],'d'),
+        horizontalalignment='center',
+        color='white' if cm[i,j]>thresh else 'black')
+
+    plt.tight_layout()
+    plt.ylabel('Actually')
+    plt.xlabel('Prediction')
+    plt.show()
+
+def displayImage(x):
+    plt.imshow(
+        x.reshape(28,28),
+        cmap=plt.cm.binary,
+        interpolation="nearest")
+    plt.show()
+
+def displayPredict(clf, actually_y,x_test):
+    print("Actually:",actually_y)
+    print("Prediction:",clf.predict([x_test])[0])   
+ 
+mnist_raw = loadmat("mnist-original.mat")
+mnist = {
+   "data":mnist_raw["data"].T,
+   "target":mnist_raw["label"][0]
+}
+
+x,y = mnist["data"],mnist["target"]
+
+xtrain,xtest,ytrain,ytest = x[:60000], x[60000:], y[:60000],y[60000:] 
+
+#class 0, class not 0
+#ข้อมูล 1 ค่า -> data model ->class 0 ? true: false 
+predict_number = 6000
+#create boolean array if the value equals zero
+ytrain_5 = (ytrain==5)
+ytest_5 = (ytest==5)
+
+sgd_clf = SGDClassifier() 
+"""สร้าง Object SGD"""
+sgd_clf.fit(xtrain,ytrain_5)
+"""เทรนข้อมูลทั้งหมดโดยเช็ค class""" 
+
+ytrain_pred = cross_val_predict(sgd_clf,xtrain,ytrain_5,cv=3)
+cm=confusion_matrix(ytrain_5,ytrain_pred)
+
+ytest_pred = sgd_clf.predict(xtest)
+
+classes = ["Other numbers","Number 5"]
+print(classification_report(ytest_pred,ytest_5,target_names=classes))
+
+---------------------------------------------------------------
+
+
+
 
 
