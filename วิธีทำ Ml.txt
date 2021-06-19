@@ -847,6 +847,71 @@ print(pd.crosstab(ytest,ypred,rownames=["Actually"],colnames=["Prediction"],marg
 
 การจัดหมวดหมู่ด้วย Naive Bayes
 
+ เป็นการจัดหมวดหมู่โดยใช้หลักความน่าจะเป็นเข้ามาช่วยคำนวณ
+อธิบายสมการ แทนตัวแปร 3 ตัว คือ
+
+c คือ Class
+x คือ Attribute
+P คือ Probability (ความน่าจะเป็น)
+P(c|x) Posterior probability คือ
+ความน่าจะเป็นที่ข้อมูลที่มีแอตทริบิวต์เป็น x จะมีคลาส C
+P(x|c) Likelihood คือ ความน่าจะเป็นที่ข้อมูลที่มีคลาส C และมีแอตทริบิวต์ x
+P(c) Prior probability คือ จำนวน Classที่อาจจะเกิดขึ้น/จำนวนClass ทั้งหมด
+หรือความน่าจะเป็นของ Class C
+P(x) Predictor Prior probability คือ จำนวน Attribute ทั้งหมด
+
+กำหนดค่าตัวแปรในสมการได้ ดังนี้
+c คือ Class (เพศชาย/เพศหญิง)
+x คือ Attribute (สีผิว , ส่วนสูง , น้ำหนัก )
+P คือ Probability (ความน่าจะเป็น)
+จำนวนเพศหญิงใน Dataset = 10
+จำนวนเพศชายใน Dataset = 5
+P(x|c) Likelihood ความน่าจะเป็นที่ข้อมูลที่มีคลาส C และมีแอตทริบิวต์ x
+หมายถึง ความน่าจะเป็นที่ข้อมูลชาย-หญิงจะมีคนที่มีสีผิว น้ำหนัก ส่วนสูง
+ตามเกณฑ์ที่กำหนด เช่น
+- ในจำนวนผู้หญิง 10 คน มีผิวสีขาว 9 คน ค่า P(x|c=เพศหญิง) = 9/10
+- ในจำนวนผู้ชาย 5 คน มีผิวสีขาว 3 คน ค่า P(x|c=เพศชาย) = 3/5
+P(c) Prior probability คือ ความน่าจะเป็นของ Class
+คือจำนวนของ Class / Class ทั้งหมด
+- ถ้าคิดค่า P(c) ของผู้หญิง= 10/15
+- ถ้าค่า P(c) ของผู้ชาย= 5/15
+P(x) Predictor Prior probability = 12/15
+หมายถึงมีคนผิวขาวจำนวน 12 คนจากทั้งหมด 15 คน
+ค่าของ P(c=เพศหญิง|x) = 0.75
+ค่าของ P(c=เพศชาย|x) = 0.25
+ดังนั้นจากข้อมูลใน Dataset
+จะมีคนผิวขาวที่เป็นเพศหญิง 75% และเป็นเพศชาย 25%
+
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+
+#load datasets
+iris_datasets = load_iris()
+
+#assign attribute
+x=iris_datasets["data"]
+"""x is all data in the set"""
+y=iris_datasets["target"]
+"""y is the species of iris"""
+
+#split data for testing and training
+xtrain, xtest, ytrain, ytest = train_test_split(x,y)
+
+#creating model
+model = GaussianNB()
+
+#training model
+model.fit(xtrain,ytrain)
+
+#Testing model
+ypred = model.predict(xtest)
+
+#measure the model efficiency(Accuracy score)
+print(f"Accuracy: {accuracy_score(ytest,ypred)*100} %")
+
 
 
 
